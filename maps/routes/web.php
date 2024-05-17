@@ -9,3 +9,5 @@ Route::get('/cities', [CityController::class, 'index']);
 
 Route::get('/query/{cityName}', [CityController::class, 'findClosestCities']);
 Route::get('/get-cities/{initials}', [CityController::class, 'getCityNamesThatStartWith']);
+
+Route::get('/get-neariest-cities/{long}/{lat}', [CityController::class, 'getNeariestCities']);

@@ -51,4 +51,31 @@ return $closestCities;
         return $cities;
     }
 
+
+    public function getNeariestCities($long, $lat)
+    {
+        try {
+            $cities = City::raw(function ($collection) use ($long, $lat) {
+                return $collection->aggregate([
+                    [
+                        '$geoNear' => [
+                            'near' => [
+                                'type' => 'Point',
+                                'coordinates' => [$long, $lat]
+                            ],
+                            'distanceField' => 'distance',
+                            'spherical' => true,
+                            'maxDistance' => 1000000 // 1000 km
+                        ]
+                    ]
+                ]);
+            });
+            return $cities;
+        } catch (\Exception $e) {
+            // Log the error message
+            Log::error('Error fetching nearest cities: ' . $e->getMessage());
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    }
+    
 }

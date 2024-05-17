@@ -10,122 +10,131 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     @vite('resources/css/app.css')
+</head>
+
+<body class="font-sans">
+    <div class="flex h-screen">
+
+        <div id="sidebar" class="flex flex-col">
+            <div id="searchbar" class="m-4">
+                <input id="citySelect" class="w-full border-2 border-neutral-800 rounded text-lg py-2 px-4"
+                    oninput="debuouncedFetching(this.value)">
+            </div>
+        </div>
+        <div id="map" class="w-3/4"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        // let debounceTimer;
+        const showNeighbouringCities = (cityName) => {
+            fetch(`/query/${cityName}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(neghbouringCities => {
+                    for(const neghbouringCity of neghbouringCities) {
+                        const cityDiv = document.createElement('div');
+                        cityDiv.className = 'p-2 m-2 bg-gray-200';
+                        cityDiv.textContent = `${neghbouringCity.city}, ${neghbouringCity.region}, ${neghbouringCity.country}`;
+                        document.getElementById('sidebar').appendChild(cityDiv);
+                    }
+                });
+        }
 
-    // function debounce(callback, delay) {
-    //     clearTimeout(debounceTimer);
-    //     debounceTimer = setTimeout(callback, delay);
-    // }
-
-    const showNeighbouringCities = (cityName) => {
-        fetch(`/query/${cityName}`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
+        let timer;
+        function debounce(callback, delay) {
+            return function() {
+                clearTimeout(timer);
+                timer = setTimeout(callback, delay);
             }
         }
-        )
-            .then(response => response.json())
-            .then(neghbouringCities => {
-                for(const neghbouringCity of neghbouringCities) {
-                    const cityDiv = document.createElement('div');
-                    cityDiv.className = 'p-2 m-2 bg-gray-200';
-                    cityDiv.textContent = `${neghbouringCity.city}, ${neghbouringCity.region}, ${neghbouringCity.country}`;
-                    document.getElementById('sidebar').appendChild(cityDiv);
-                }
-            });
-
-
-    }
-   
-    function debouce(callback, delay) {
-        let timer;
-        return function() {
-            clearTimeout(timer);
-            timer = setTimeout(callback, delay);
+        function debuouncedFetching(value){
+            debounce(()=>getCitiesWithInitials(value), 500)();
+        } 
+        const addSearchButton = (city) => {
+            const sidebar = document.getElementById('sidebar');
+            const searchButton = document.createElement('button');
+            searchButton.className = 'bg-blue-500 text-white p-2 m-4 rounded';
+            searchButton.textContent = 'Search';
+            searchButton.onclick = () => {
+                showNeighbouringCities(city.city);
+            }
+            sidebar.appendChild(searchButton);
         }
-    }
-    
-    const addSearchButton = (city) => {
-        const sidebar = document.getElementById('sidebar');
-        const searchButton = document.createElement('button');
-        searchButton.className = 'bg-blue`-500 text-white p-2 m-4 rounded';
-        searchButton.textContent = 'Search';
-        searchButton.onclick = () => {
-            showNeighbouringCities(city.city);
-        }
-        sidebar.appendChild(searchButton);
-    }
 
-    const removeSearchButton = () => {
-        const sidebar = document.getElementById('sidebar');
-        const searchButton = document.querySelector('button');
-        if (searchButton) {
-            sidebar.removeChild(searchButton);
+        const removeSearchButton = () => {
+            const sidebar = document.getElementById('sidebar');
+            const searchButton = document.querySelector('button');
+            if (searchButton) {
+                sidebar.removeChild(searchButton);
+            }
         }
-    }
-    const getCitiesWithInitials = (city)=> {
+
+        const getCitiesWithInitials = (city)=> {
             fetch(`/get-cities/${city}`)
                 .then(response => response.json())
                 .then(data => {
                     updateCityOptions(data);
-           });
-    }
-
-    function updateCityOptions(cities) {
-        const citySelect = document.getElementById('citySelect');
-        const searchbar = document.getElementById('searchbar');
-        if (!cities.length) {
-            searchbar.innerHTML = "<input id='citySelect' class='w-full' onchange='()=>getCitiesWithInitials(this.value)'>";
-            removeSearchButton();
-            return;
+                });
         }
-        searchbar.appendChild(citySelect);
-        for (let i = 0; i < cities.length; i++) {   
-            const option = document.createElement('div');
-            option.className = 'cursor-pointer p-2 hover:bg-gray-200';
-            option.value = cities[i]._id;
-            option.onclick = () => {
+
+        function updateCityOptions(cities) {
+            const citySelect = document.getElementById('citySelect');
+            const searchbar = document.getElementById('searchbar');
+            if (!cities.length) {
                 searchbar.innerHTML = "<input id='citySelect' class='w-full' onchange='()=>getCitiesWithInitials(this.value)'>";
-                const citySelect = document.getElementById('citySelect');
-                citySelect.value = `${cities[i].city}, ${cities[i].region}, ${cities[i].country}`;
-                addSearchButton(cities[i]);
-
+                removeSearchButton();
+                return;
             }
-            option.textContent = `${cities[i].city}, ${cities[i].region}, ${cities[i].country}`;
-            searchbar.appendChild(option);
+            searchbar.appendChild(citySelect);
+            for (let i = 0; i < cities.length; i++) {   
+                const option = document.createElement('div');
+                option.className = 'cursor-pointer p-2 hover:bg-gray-200';
+                option.value = cities[i]._id;
+                option.onclick = () => {
+                    searchbar.innerHTML = "<input id='citySelect' class='w-full' onchange='()=>getCitiesWithInitials(this.value)'>";
+                    const citySelect = document.getElementById('citySelect');
+                    citySelect.value = `${cities[i].city}, ${cities[i].region}, ${cities[i].country}`;
+                    addSearchButton(cities[i]);
+                }
+                option.textContent = `${cities[i].city}, ${cities[i].region}, ${cities[i].country}`;
+                searchbar.appendChild(option);
+            }
+        } 
+
+        function debouncedFetching(value){
+            debounce(()=>getCitiesWithInitials(value), 500)();
         }
-<<<<<<< Updated upstream
-    }    
+
+        // Initialize Leaflet Map
+        const map = L.map('map').setView([33.738045, 73.084488], 4);
+
+        // Add Tile Layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        let newMarker;
+        map.on('click', (e) => {
+            const { lat, lng } = e.latlng;
+            if (newMarker) {
+                map.removeLayer(newMarker);
+            }
+            newMarker = L.marker([lat, lng]).addTo(map);
+            fetch(`/get-neariest-cities/${lng}/${lat}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                });
+
+        }); 
+        
     </script>
-</head>
-
-<body class="font-sans">
-    <div class="flex">
-
-        <div id="sidebar" class="flex flex-col w-1/4">
-            <div id="searchbar" class="m-4">
-            <input id="citySelect" class="w-full" onchange="getCitiesWithInitials(this.value)">
-=======
-    }    function debuouncedFetching(value){
-        debouce(()=>getCitiesWithInitials(value), 500)();
-    }
-</script>
-    </head>
-    <body class="font-sans">
-        <div id="sidebar" class="flex flex-col">
-            <div id="searchbar" class="m-4">
-                <input id="citySelect" class="w-full" oninput="debuouncedFetching(this.value)">
-            </div>
->>>>>>> Stashed changes
-        </div>
-    </div>
-    <div class="w-3/4">
-        <x-maps-leaflet :zoomLevel="4" :markers="[['lat' => 33.738045, 'long' => 73.084488]]" :centerPoint="['lat' => 33.738045, 'long' => 73.084488]"></x-maps-leaflet>
-    </div>
-</div>
 </body>
 
 </html>
