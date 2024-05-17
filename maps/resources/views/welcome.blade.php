@@ -39,12 +39,19 @@
 
 
     }
-    
+   
+    function debouce(callback, delay) {
+        let timer;
+        return function() {
+            clearTimeout(timer);
+            timer = setTimeout(callback, delay);
+        }
+    }
     
     const addSearchButton = (city) => {
         const sidebar = document.getElementById('sidebar');
         const searchButton = document.createElement('button');
-        searchButton.className = 'bg-blue-500 text-white p-2 m-4 rounded';
+        searchButton.className = 'bg-blue`-500 text-white p-2 m-4 rounded';
         searchButton.textContent = 'Search';
         searchButton.onclick = () => {
             showNeighbouringCities(city.city);
@@ -66,15 +73,17 @@
                     updateCityOptions(data);
            });
     }
+
     function updateCityOptions(cities) {
+        const citySelect = document.getElementById('citySelect');
         const searchbar = document.getElementById('searchbar');
         if (!cities.length) {
             searchbar.innerHTML = "<input id='citySelect' class='w-full' onchange='()=>getCitiesWithInitials(this.value)'>";
             removeSearchButton();
             return;
         }
-        const citySelect = document.getElementById('citySelect');
-        for (let i = 0; i < cities.length; i++) {
+        searchbar.appendChild(citySelect);
+        for (let i = 0; i < cities.length; i++) {   
             const option = document.createElement('div');
             option.className = 'cursor-pointer p-2 hover:bg-gray-200';
             option.value = cities[i]._id;
@@ -88,6 +97,7 @@
             option.textContent = `${cities[i].city}, ${cities[i].region}, ${cities[i].country}`;
             searchbar.appendChild(option);
         }
+<<<<<<< Updated upstream
     }    
     </script>
 </head>
@@ -98,6 +108,18 @@
         <div id="sidebar" class="flex flex-col w-1/4">
             <div id="searchbar" class="m-4">
             <input id="citySelect" class="w-full" onchange="getCitiesWithInitials(this.value)">
+=======
+    }    function debuouncedFetching(value){
+        debouce(()=>getCitiesWithInitials(value), 500)();
+    }
+</script>
+    </head>
+    <body class="font-sans">
+        <div id="sidebar" class="flex flex-col">
+            <div id="searchbar" class="m-4">
+                <input id="citySelect" class="w-full" oninput="debuouncedFetching(this.value)">
+            </div>
+>>>>>>> Stashed changes
         </div>
     </div>
     <div class="w-3/4">
