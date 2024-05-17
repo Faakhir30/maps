@@ -10,6 +10,7 @@
         "laravel/framework": "^11.0",
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.5",
+        "larswiegers/laravel-maps": "^0.18.0",
         "livewire/livewire": "^3.4",
         "mongodb/laravel-mongodb": "^4.3",
         "mongodb/mongodb": "^1.15"

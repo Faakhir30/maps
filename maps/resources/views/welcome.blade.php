@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Laravel</title>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
-        @vite('resources/css/app.css')
-        <script>
-    // let debounceTimer;
+    <title>Laravel</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
+    @vite('resources/css/app.css')
+    <script>
+        // let debounceTimer;
 
     // function debounce(callback, delay) {
     //     clearTimeout(debounceTimer);
@@ -88,13 +89,21 @@
             searchbar.appendChild(option);
         }
     }    
-</script>
-    </head>
-    <body class="font-sans">
-        <div id="sidebar" class="flex flex-col">
+    </script>
+</head>
+
+<body class="font-sans">
+    <div class="flex">
+
+        <div id="sidebar" class="flex flex-col w-1/4">
             <div id="searchbar" class="m-4">
-                <input id="citySelect" class="w-full" onchange="getCitiesWithInitials(this.value)">
-            </div>
+            <input id="citySelect" class="w-full" onchange="getCitiesWithInitials(this.value)">
         </div>
-    </body>
+    </div>
+    <div class="w-3/4">
+        <x-maps-leaflet :zoomLevel="4" :markers="[['lat' => 33.738045, 'long' => 73.084488]]" :centerPoint="['lat' => 33.738045, 'long' => 73.084488]"></x-maps-leaflet>
+    </div>
+</div>
+</body>
+
 </html>
